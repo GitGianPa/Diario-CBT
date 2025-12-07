@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diario CBT Monitoraggio</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f0f2f5; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; font-size: 1.2rem; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #34495e; }
+        textarea, select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        button { width: 100%; background-color: #25D366; color: white; padding: 15px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; margin-top: 25px; cursor: pointer; }
+        button:active { background-color: #128C7E; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Nuovo Diario CBT</h2>
+    
+    <label>Evento / Situazione (A)</label>
+    <textarea id="situazione" rows="3" placeholder="Cosa è successo? Con chi eri?"></textarea>
+
+    <label>Pensieri Automatici (B)</label>
+    <textarea id="pensieri" rows="3" placeholder="Cosa ti è passato per la testa?"></textarea>
+
+    <label>Emozione Prevalente</label>
+    <select id="emozione">
+        <option value="Ansia">Ansia</option>
+        <option value="Tristezza">Tristezza</option>
+        <option value="Rabbia">Rabbia</option>
+        <option value="Colpa">Colpa</option>
+        <option value="Altro">Altro</option>
+    </select>
+
+    <label>Intensità (0-10)</label>
+    <input type="range" id="intensita" min="0" max="10" value="5" oninput="this.nextElementSibling.value = this.value">
+    <output>5</output>
+
+    <label>Reazione / Comportamento (C)</label>
+    <textarea id="comportamento" rows="3" placeholder="Cosa hai fatto?"></textarea>
+
+    <button onclick="inviaWhatsApp()">Invia al Dottore</button>
+</div>
+
+<script>
+    function inviaWhatsApp() {
+        const telefono = "393280486641"; // SOSTITUISCI CON IL TUO NUMERO (con 39)
+        
+        const a = document.getElementById('situazione').value;
+        const b = document.getElementById('pensieri').value;
+        const emozione = document.getElementById('emozione').value;
+        const intensita = document.getElementById('intensita').value;
+        const c = document.getElementById('comportamento').value;
+
+        const testo = `*DIARIO CBT*%0A%0A` +
+                      `*A (Situazione):* ${a}%0A` +
+                      `*B (Pensieri):* ${b}%0A` +
+                      `*Emozione:* ${emozione} (${intensita}/10)%0A` +
+                      `*C (Comportamento):* ${c}`;
+
+        window.open(`https://wa.me/${telefono}?text=${testo}`, '_blank');
+    }
+</script>
+
+</body>
+</html>
