@@ -9,12 +9,16 @@
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 500px; margin: auto; }
         h2 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
         label { display: block; margin-top: 18px; font-weight: 600; color: #444; font-size: 0.95rem; }
-        textarea, select, input { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1rem; background-color: #fafafa; }
-        textarea:focus { border-color: #3498db; outline: none; background-color: #fff; }
+        textarea, input { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1rem; background-color: #fafafa; }
+        
+        /* Stile per i Chip delle emozioni */
+        .emozioni-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .chip { padding: 8px 14px; background-color: #eee; border-radius: 20px; font-size: 0.9rem; cursor: pointer; transition: 0.2s; border: 1px solid #ddd; }
+        .chip.selected { background-color: #3498db; color: white; border-color: #2980b9; }
+
         .slider-container { display: flex; align-items: center; gap: 10px; }
         output { font-weight: bold; color: #3498db; min-width: 40px; }
-        button { width: 100%; background-color: #25D366; color: white; padding: 16px; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; margin-top: 30px; cursor: pointer; transition: transform 0.1s; }
-        button:active { transform: scale(0.98); background-color: #1ebea5; }
+        button#invia { width: 100%; background-color: #25D366; color: white; padding: 16px; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: bold; margin-top: 30px; cursor: pointer; }
         .section-title { border-bottom: 2px solid #eee; margin-top: 25px; padding-bottom: 5px; color: #7f8c8d; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
     </style>
 </head>
@@ -29,7 +33,7 @@
     <div class="section-title">Pensieri (B)</div>
 
     <label>Cosa hai pensato? Che significato ha per te?</label>
-    <textarea id="pensieri" rows="3" placeholder="Descrivi il contenuto e il significato..."></textarea>
+    <textarea id="pensieri" rows="3" placeholder="Descrivi il contenuto..."></textarea>
 
     <label>Quanto è vero per te? (Credibilità 0-100%)</label>
     <div class="slider-container">
@@ -39,64 +43,87 @@
 
     <div class="section-title">Emozioni e Corpo</div>
 
-    <label>Emozione Prevalente</label>
-    <select id="emozione">
-        <option value="">Seleziona...</option>
-        <option>Ammirazione</option><option>Amore</option><option>Ansia</option><option>Appagamento</option>
-        <option>Apprensione</option><option>Curiosità</option><option>Disgusto</option><option>Euforia</option>
-        <option>Gioia (o Felicità)</option><option>Gratitudine</option><option>Imbarazzo</option><option>Invidia</option>
-        <option>Noia</option><option>Orgoglio</option><option>Panico</option><option>Paura</option>
-        <option>Pietà</option><option>Rabbia</option><option>Rammarico</option><option>Senso di colpa</option>
-        <option>Soddisfazione</option><option>Sorpresa</option><option>Tristezza</option><option>Vergogna</option>
-    </select>
+    <label>Seleziona una o più emozioni:</label>
+    <div class="emozioni-container" id="container-chip">
+        </div>
 
-    <label>Intensità Emozione (0-10)</label>
+    <label>Intensità Media (0-10)</label>
     <div class="slider-container">
         <input type="range" id="intensita" min="0" max="10" value="5" oninput="this.nextElementSibling.value = this.value">
         <output>5</output>
     </div>
 
     <label>Sensazioni somatiche</label>
-    <textarea id="somatiche" rows="2" placeholder="Cosa senti nel corpo? (es. nodo in gola, tachicardia)"></textarea>
+    <textarea id="somatiche" rows="2" placeholder="Cosa senti nel corpo?"></textarea>
 
     <div class="section-title">Conseguenze (C)</div>
 
     <label>Cosa hai fatto? (Comportamento)</label>
-    <textarea id="comportamento" rows="2" placeholder="Tua reazione esterna..."></textarea>
+    <textarea id="comportamento" rows="2" placeholder="Tua reazione..."></textarea>
 
-    <label>Conseguenze del pensiero (Breve/Lungo termine per te e altri)</label>
-    <textarea id="conseguenze" rows="3" placeholder="Qual è l'impatto di questo pensiero?"></textarea>
+    <label>Conseguenze del pensiero (Breve/Lungo termine)</label>
+    <textarea id="conseguenze" rows="2" placeholder="Impatto per te e per gli altri..."></textarea>
 
-    <button onclick="inviaWhatsApp()">Invia Diario via WhatsApp</button>
+    <button id="invia" onclick="inviaWhatsApp()">Invia Diario via WhatsApp</button>
 </div>
 
 <script>
-    function inviaWhatsApp() {
-        const telefono = "391234567890"; // SOSTITUISCI CON IL TUO NUMERO
-        
-        const campi = {
-            a: document.getElementById('situazione').value,
-            b: document.getElementById('pensieri').value,
-            cred: document.getElementById('credibilita').value,
-            emo: document.getElementById('emozione').value,
-            int: document.getElementById('intensita').value,
-            som: document.getElementById('somatiche').value,
-            c: document.getElementById('comportamento').value,
-            cons: document.getElementById('conseguenze').value
+    const listaEmozioni = [
+        "Ammirazione", "Amore", "Ansia", "Appagamento", "Apprensione", 
+        "Curiosità", "Sorpresa", "Disgusto", "Euforia", "Gioia", 
+        "Gratitudine", "Invidia", "Noia", "Orgoglio", "Paura", 
+        "Panico", "Pietà", "Rabbia", "Rammarico", "Senso di colpa", 
+        "Soddisfazione", "Tristezza", "Vergogna", "Imbarazzo"
+    ];
+
+    const container = document.getElementById('container-chip');
+    let selezionate = [];
+
+    // Genera i chip dinamicamente
+    listaEmozioni.forEach(emo => {
+        let chip = document.createElement('div');
+        chip.classList.add('chip');
+        chip.innerText = emo;
+        chip.onclick = function() {
+            if (this.classList.contains('selected')) {
+                this.classList.remove('selected');
+                selezionate = selezionate.filter(item => item !== emo);
+            } else {
+                this.classList.add('selected');
+                selezionate.push(emo);
+            }
         };
+        container.appendChild(chip);
+    });
+
+    function inviaWhatsApp() {
+        const telefono = "391234567890"; // <--- METTI IL TUO NUMERO QUI
+        
+        const a = document.getElementById('situazione').value;
+        const b = document.getElementById('pensieri').value;
+        const cred = document.getElementById('credibilita').value;
+        const int = document.getElementById('intensita').value;
+        const som = document.getElementById('somatiche').value;
+        const c = document.getElementById('comportamento').value;
+        const cons = document.getElementById('conseguenze').value;
+
+        const emozioniTesto = selezionate.length > 0 ? selezionate.join(", ") : "Nessuna selezionata";
 
         const testo = `*DIARIO MONITORAGGIO CBT*%0A%0A` +
-                      `*SITUAZIONE (A):* ${campi.a}%0A%0A` +
-                      `*PENSIERO (B):* ${campi.b}%0A` +
-                      `*Credibilità:* ${campi.cred}%25%0A%0A` +
-                      `*EMOZIONE:* ${campi.emo} (${campi.int}/10)%0A` +
-                      `*SENSAZIONI CORPO:* ${campi.som}%0A%0A` +
-                      `*COMPORTAMENTO (C):* ${campi.c}%0A` +
-                      `*CONSEGUENZE:* ${campi.cons}`;
+                      `*SITUAZIONE (A):* ${a}%0A%0A` +
+                      `*PENSIERO (B):* ${b}%0A` +
+                      `*Credibilità:* ${cred}%25%0A%0A` +
+                      `*EMOZIONI:* ${emozioniTesto}%0A` +
+                      `*INTENSITÀ:* ${int}/10%0A` +
+                      `*SENSAZIONI CORPO:* ${som}%0A%0A` +
+                      `*COMPORTAMENTO (C):* ${c}%0A` +
+                      `*CONSEGUENZE:* ${cons}`;
 
         window.open(`https://wa.me/${telefono}?text=${testo}`, '_blank');
     }
 </script>
 
+</body>
+</html>
 </body>
 </html>
